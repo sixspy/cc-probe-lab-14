@@ -1,7 +1,7 @@
 from pathlib import Path
 from quart import Quart, jsonify, request, send_from_directory, redirect
 from app import seed
-from app.services import 目录, 装载, 结栏, 贯验, 夹具, 统计, 说明
+from app.services import 目录, 装载, 结栏, 贯验, 夹具, 统计, 说明, 升格回放
 
 _STATIC = Path(__file__).resolve().parent / "static"
 app = Quart(__name__)
@@ -66,6 +66,21 @@ async def api_汇总():
 @app.get("/api/坏点匣")
 async def api_坏点():
     return jsonify(目录.坏点列表())
+
+
+@app.get("/api/坏点升格回放")
+async def api_升格只读():
+    """只读接口：升格账册（指纹 → 原坏点/现行入栏两轨引用）。"""
+    return jsonify(升格回放.只读())
+
+
+@app.post("/api/坏点升格回放/跑")
+async def api_升格回放():
+    body = await request.get_json(force=True, silent=True) or {}
+    try:
+        return jsonify(升格回放.升格回放(body))
+    except ValueError as e:
+        return jsonify({"错误": str(e)}), 400
 
 
 @app.get("/api/栏贯验")

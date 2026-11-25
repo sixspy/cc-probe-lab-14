@@ -32,14 +32,14 @@ function 安全文本(s) {
   })[c]);
 }
 function 命运色(f) {
-  if (["已入栏", "在栏", "已汇总", "对齐"].includes(f)) return "ok";
-  if (["已坏点", "撕裂"].includes(f)) return "warn";
+  if (["已入栏", "在栏", "已汇总", "对齐", "已升格"].includes(f)) return "ok";
+  if (["已坏点", "撕裂", "在匣"].includes(f)) return "warn";
   return "";
 }
 function 渲染水位(el, o) {
   if (!el) return;
   el.innerHTML = "";
-  for (const [标, 键] of [["观测报文","观测报文"],["在栏","在栏"],["站点汇总","站点汇总"],["坏点","坏点"]]) {
+  for (const [标, 键] of [["观测报文","观测报文"],["在栏","在栏"],["站点汇总","站点汇总"],["坏点在匣","坏点在匣"],["升格影子","升格影子"]]) {
     const d = document.createElement("div");
     d.className = "水卡";
     d.innerHTML = `<div class="数">${o[键] ?? 0}</div><div class="标">${标}</div>`;

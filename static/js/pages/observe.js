@@ -10,7 +10,7 @@ export const STAGE = {
   verify: "贯验：已汇总缓冲报文数须等于汇总账报文数之和",
 };
 export function fateChip(fate) {
-  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok"};
+  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok","已升格":"ok","在匣":"warn"};
   return { text: fate, tone: map[fate] || "" };
 }
 export function summarizeLoad(r) {
@@ -76,7 +76,7 @@ export function observeColumns() {
   return ["报文编号", "站点键", "指标键", "读数", "观测时", "命运"];
 }
 export function observeFateOrder() {
-  return ["已装载", "已入栏", "已坏点", "已汇总"];
+  return ["已装载", "已入栏", "已坏点", "已升格", "已汇总"];
 }
 export function filterByFate(rows, fate) {
   return (rows || []).filter((r) => !fate || r["命运"] === fate);

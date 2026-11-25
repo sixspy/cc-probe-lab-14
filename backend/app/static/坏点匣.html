@@ -16,21 +16,80 @@
     <div class="门槛条" id="门槛条"></div>
     <header class="顶牌" style="margin-bottom:10px">
       <h1 style="font-size:22px">坏点匣</h1>
-      <div class="骨">未过质控门槛的报文旁路。</div>
+      <div class="骨">未过质控门槛的报文旁路。升格回放走双写两轨：原行进只读归档影子，现行入栏带升格指纹。</div>
     </header>
 
     <section class="卷">
-      <div class="表绕"><table><thead><tr><th>编号</th><th>报文编号</th><th>站点</th><th>原因</th><th>读数</th><th>观测时</th></tr></thead><tbody id="表"></tbody></table></div>
+      <h2>升格回放</h2>
+      <div class="工具">
+        <input class="只读框" id="匣号" placeholder="坏点编号，多个用逗号，如 1,2" style="min-width:260px"/>
+        <button class="按钮 青" id="升格">升格回放所选</button>
+        <span id="升格果" class="说明"></span>
+      </div>
+      <p class="说明">无键（不带坏点编号）回放切流拒绝；同指纹二次回放幂等拒绝；升格与销匣同票同成败。</p>
     </section>
+
+    <section class="卷">
+      <h2>坏点匣（现行在匣 + 归档影子）</h2>
+      <div class="表绕"><table><thead><tr><th>编号</th><th>报文编号</th><th>站点</th><th>原因</th><th>读数</th><th>观测时</th><th>坏点状态</th><th>升格指纹</th><th>升格时</th></tr></thead><tbody id="表"></tbody></table></div>
+    </section>
+
+    <section class="卷">
+      <h2>升格账册（切流账 · 只读）</h2>
+      <div class="表绕"><table><thead><tr><th>升格指纹</th><th>坏点编号</th><th>报文编号</th><th>栏号</th><th>时刻</th></tr></thead><tbody id="账表"></tbody></table></div>
+    </section>
+
     <script>
-    (async () => {
+    function 状态徽章(s) {
+      if (s === "已升格") return 探栏.徽章("已升格·影子", "好");
+      return 探栏.徽章(s || "在匣", "警");
+    }
+    async function 刷匣子() {
       const rows = await 探栏.getJSON("/api/坏点匣");
       const tb = document.getElementById("表");
-      if (!rows.length) { tb.innerHTML = `<tr><td colspan="6">${探栏.空态("坏点匣为空。灌坏点样例可看到越界旁路。")}</td></tr>`; return; }
+      if (!rows.length) { tb.innerHTML = `<tr><td colspan="9">${探栏.空态("坏点匣为空。灌坏点样例可看到越界旁路。")}</td></tr>`; return; }
+      tb.innerHTML = "";
       for (const r of rows) {
-        tb.appendChild(探栏.行(`<td>${r.编号}</td><td>${探栏.安全文本(r.报文编号)}</td><td>${探栏.安全文本(r.站点键)}</td><td>${探栏.徽章(r.原因,"警")}</td><td>${r.读数}</td><td>${探栏.安全文本(r.观测时)}</td>`));
+        tb.appendChild(探栏.行(
+          `<td>${r.编号}</td>` +
+          `<td>${探栏.安全文本(r.报文编号)}</td>` +
+          `<td>${探栏.安全文本(r.站点键)}</td>` +
+          `<td>${探栏.徽章(r.原因,"警")}</td>` +
+          `<td>${r.读数}</td>` +
+          `<td>${探栏.安全文本(r.观测时)}</td>` +
+          `<td>${状态徽章(r.坏点状态)}</td>` +
+          `<td>${探栏.安全文本(r.升格指纹 || "—")}</td>` +
+          `<td>${探栏.安全文本(r.升格时 || "—")}</td>`
+        ));
       }
-    })();
+    }
+    async function 刷账() {
+      const rows = await 探栏.getJSON("/api/坏点升格回放");
+      const tb = document.getElementById("账表");
+      if (!rows.length) { tb.innerHTML = `<tr><td colspan="5">${探栏.空态("尚无升格账。升格后此处钉指纹，串起影子与现行入栏。")}</td></tr>`; return; }
+      tb.innerHTML = "";
+      for (const r of rows) {
+        tb.appendChild(探栏.行(
+          `<td>${探栏.安全文本(r.升格指纹)}</td><td>${r.坏点编号}</td>` +
+          `<td>${探栏.安全文本(r.报文编号)}</td><td>${探栏.安全文本(r.栏号)}</td>` +
+          `<td>${探栏.安全文本(r.时刻)}</td>`
+        ));
+      }
+    }
+    document.getElementById("升格").onclick = async () => {
+      const 果 = document.getElementById("升格果");
+      const raw = document.getElementById("匣号").value.trim();
+      const 坏点编号 = raw.split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isInteger(n));
+      try {
+        const r = await 探栏.postJSON("/api/坏点升格回放/跑", { 坏点编号 });
+        果.innerHTML = 探栏.徽章(`已升格 ${r.升格} 笔 · ${r.升格指纹}`, "好");
+        await Promise.all([刷匣子(), 刷账()]);
+      } catch (e) {
+        果.innerHTML = 探栏.徽章("拒绝:" + String(e), "危");
+      }
+    };
+    刷匣子();
+    刷账();
     </script>
 
   </div>

@@ -31,7 +31,9 @@ CREATE TABLE IF NOT EXISTS 入栏缓冲 (
   观测时 TEXT NOT NULL,
   栏号 TEXT NOT NULL,
   命运 TEXT NOT NULL DEFAULT '在栏',
-  入栏时 TEXT NOT NULL
+  入栏时 TEXT NOT NULL,
+  升格指纹 TEXT,
+  来源坏点编号 INTEGER
 );
 CREATE TABLE IF NOT EXISTS 站点汇总账 (
   汇总编号 TEXT PRIMARY KEY,
@@ -50,7 +52,19 @@ CREATE TABLE IF NOT EXISTS 坏点匣 (
   原因 TEXT NOT NULL,
   读数 REAL NOT NULL,
   观测时 TEXT NOT NULL,
-  入匣时 TEXT NOT NULL
+  入匣时 TEXT NOT NULL,
+  坏点状态 TEXT NOT NULL DEFAULT '在匣',
+  升格指纹 TEXT,
+  升格时 TEXT
+);
+CREATE TABLE IF NOT EXISTS 升格账 (
+  编号 INTEGER PRIMARY KEY AUTOINCREMENT,
+  升格指纹 TEXT NOT NULL,
+  坏点编号 INTEGER NOT NULL,
+  报文编号 TEXT NOT NULL,
+  栏号 TEXT NOT NULL,
+  时刻 TEXT NOT NULL,
+  UNIQUE(升格指纹, 坏点编号)
 );
 CREATE TABLE IF NOT EXISTS 栏贯验 (
   编号 INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,6 +92,27 @@ CREATE TABLE IF NOT EXISTS 结栏批次 (
 );
 """
 
+# 旧库（probe-14 之前）轻量迁移：缺列补齐，不重建表。
+_迁移列 = {
+    "坏点匣": [
+        ("坏点状态", "TEXT NOT NULL DEFAULT '在匣'"),
+        ("升格指纹", "TEXT"),
+        ("升格时", "TEXT"),
+    ],
+    "入栏缓冲": [
+        ("升格指纹", "TEXT"),
+        ("来源坏点编号", "INTEGER"),
+    ],
+}
+
+
+def _迁移(conn) -> None:
+    for 表, 列们 in _迁移列.items():
+        已有 = {r["name"] for r in conn.execute(f"PRAGMA table_info({表})").fetchall()}
+        for 列, 声明 in 列们:
+            if 列 not in 已有:
+                conn.execute(f"ALTER TABLE {表} ADD COLUMN {列} {声明}")
+
 
 def 此刻() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -86,6 +121,7 @@ def 此刻() -> str:
 def 初始化库() -> None:
     conn = 连接()
     conn.executescript(建表)
+    _迁移(conn)
     if conn.execute("SELECT COUNT(*) AS c FROM 栏规").fetchone()["c"] == 0:
         for k, v in {
             "当前栏号": "B-demo",

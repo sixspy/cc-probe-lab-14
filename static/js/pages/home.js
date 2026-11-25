@@ -34,7 +34,8 @@ export function buildMetrics(o) {
     { key: "观测报文", value: o["观测报文"] || 0 },
     { key: "在栏", value: o["在栏"] || 0 },
     { key: "站点汇总", value: o["站点汇总"] || 0 },
-    { key: "坏点", value: o["坏点"] || 0 },
+    { key: "坏点在匣", value: o["坏点在匣"] ?? (o["坏点"] || 0) },
+    { key: "升格影子", value: o["升格影子"] || 0 },
   ];
 }
 

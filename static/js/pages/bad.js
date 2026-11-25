@@ -10,7 +10,7 @@ export const STAGE = {
   verify: "贯验：已汇总缓冲报文数须等于汇总账报文数之和",
 };
 export function fateChip(fate) {
-  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok"};
+  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok","已升格":"ok","在匣":"warn"};
   return { text: fate, tone: map[fate] || "" };
 }
 export function summarizeLoad(r) {
@@ -76,7 +76,14 @@ export function badColumns() {
   return ["报文编号", "站点键", "读数", "原因", "观测时"];
 }
 export function badHint() {
-  return "坏点旁路：未过门槛的报文进匣，不参与结栏汇总。";
+  return "坏点旁路：未过门槛的报文进匣，不参与结栏汇总。升格回放双写两轨：原行转只读归档影子（坏点状态=已升格，钉升格指纹），现行入栏带同一指纹，影子不计入在匣坏点。";
+}
+export function boxStateChip(state) {
+  const map = {"在匣":"warn","已升格":"ok"};
+  return { text: state === "已升格" ? "已升格·影子" : "在匣", tone: map[state] || "warn" };
+}
+export function promotionLedgerColumns() {
+  return ["升格指纹", "坏点编号", "报文编号", "栏号", "时刻"];
 }
 export function isOverLimitReason(reason) {
   return String(reason || "").includes("越界");

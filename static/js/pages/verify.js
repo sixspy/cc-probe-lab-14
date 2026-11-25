@@ -10,7 +10,7 @@ export const STAGE = {
   verify: "贯验：已汇总缓冲报文数须等于汇总账报文数之和",
 };
 export function fateChip(fate) {
-  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok"};
+  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok","已升格":"ok","在匣":"warn"};
   return { text: fate, tone: map[fate] || "" };
 }
 export function summarizeLoad(r) {
@@ -73,7 +73,11 @@ export function boneDiffersFromTide() {
 }
 
 export function verifyColumns() {
-  return ["时刻", "在栏笔数", "汇总报文数", "坏点笔数", "是否对齐", "说明"];
+  return ["时刻", "在栏笔数", "汇总报文数", "坏点在匣", "是否对齐", "说明"];
+}
+export function shadowVsLive(snap) {
+  snap = snap || {};
+  return { "坏点在匣": snap["坏点在匣"] ?? 0, "升格影子": snap["升格影子"] ?? 0 };
 }
 export function alignTone(ok) {
   return ok ? "ok" : "warn";

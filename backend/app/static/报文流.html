@@ -23,7 +23,7 @@
       <div class="横排 下距12" id="命运统计"></div>
       <div class="表绕"><table><thead><tr><th>报文编号</th><th>站点</th><th>指标</th><th>读数</th><th>观测时</th><th>命运</th></tr></thead><tbody id="表"></tbody></table></div>
     </section>
-    <section class="卷"><div class="双栏"><p class="说明">报文是装载入流。命运应可读：已装载→已入栏/已坏点→已汇总。</p><div class="侧注">子方向：采集入库质控。行业皮：环境监测传感站。</div></div></section>
+    <section class="卷"><div class="双栏"><p class="说明">报文是装载入流。命运应可读：已装载→已入栏/已坏点→已升格（坏点升格回放，原旁路键随行）→已汇总。</p><div class="侧注">子方向：采集入库质控。行业皮：环境监测传感站。</div></div></section>
     <script>
     (async () => {
       const fate = await 探栏.getJSON("/api/统计/报文命运");

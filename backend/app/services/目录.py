@@ -111,7 +111,15 @@ def 概览() -> dict:
             "观测报文": conn.execute("SELECT COUNT(*) AS c FROM 观测报文").fetchone()["c"],
             "在栏": conn.execute("SELECT COUNT(*) AS c FROM 入栏缓冲 WHERE 命运='在栏'").fetchone()["c"],
             "站点汇总": conn.execute("SELECT COUNT(*) AS c FROM 站点汇总账").fetchone()["c"],
-            "坏点": conn.execute("SELECT COUNT(*) AS c FROM 坏点匣").fetchone()["c"],
+            "坏点": conn.execute(
+                "SELECT COUNT(*) AS c FROM 坏点匣 WHERE 坏点状态='在匣'"
+            ).fetchone()["c"],
+            "坏点在匣": conn.execute(
+                "SELECT COUNT(*) AS c FROM 坏点匣 WHERE 坏点状态='在匣'"
+            ).fetchone()["c"],
+            "升格影子": conn.execute(
+                "SELECT COUNT(*) AS c FROM 坏点匣 WHERE 坏点状态='已升格'"
+            ).fetchone()["c"],
             "栏规": 栏规(),
         }
     finally:

@@ -10,7 +10,7 @@ export const STAGE = {
   verify: "贯验：已汇总缓冲报文数须等于汇总账报文数之和",
 };
 export function fateChip(fate) {
-  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok"};
+  const map = {"已入栏":"ok","在栏":"ok","已汇总":"ok","已坏点":"warn","撕裂":"danger","对齐":"ok","已升格":"ok","在匣":"warn"};
   return { text: fate, tone: map[fate] || "" };
 }
 export function summarizeLoad(r) {
@@ -73,7 +73,10 @@ export function boneDiffersFromTide() {
 }
 
 export function bufferColumns() {
-  return ["报文编号", "站点键", "指标键", "读数", "栏号", "命运"];
+  return ["报文编号", "站点键", "指标键", "读数", "栏号", "命运", "入栏来源", "升格指纹"];
+}
+export function rowSource(r) {
+  return r["升格指纹"] ? { text: `升格回放#${r["来源坏点编号"]}`, tone: "ok" } : { text: "新装入栏", tone: "" };
 }
 export function onlyInBar(rows) {
   return (rows || []).filter((r) => r["命运"] === "在栏");
